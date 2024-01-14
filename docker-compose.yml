@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  rosbridge:
+    image: rosbridge
+    build:
+      context: ./rosbridge
+      dockerfile: ./Dockerfile
+      args:
+        ROS_DISTRO: humble
+    command: [ros2, launch, rosbridge_server, rosbridge_websocket_launch.xml]
+    ports:
+      - 9090:9090
+    network_mode: host
+
+  rosbridge2cpp:
+    build:
+      context: ./rosbridge2cpp
+      dockerfile: ./Dockerfile
+      args:
+        ROS_DISTRO: humble
+    network_mode: host
+    depends_on:
+      - rosbridge
+    command: [/root/rosbridge2cpp/build/rosbridge2cpp-client]
+
+  rosbridge_echo:
+    image: rosbridge
+    command: [ros2, echo, /test_rosbridge2cpp]
+    network_mode: host
